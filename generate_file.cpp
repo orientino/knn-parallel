@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
     srand(seed);
     vector<pair<double, double>> points = generate_pairs(n, range, 1);
 
-    // Save the generated points into a file
+    // save the generated points into a file
     ofstream fout("./data.csv");
     for (auto const& x : points)
         fout << x.first << "," << x.second << endl; 
