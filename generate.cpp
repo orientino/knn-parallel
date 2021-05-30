@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
     } 
 
     srand(seed);
-    vector<pair<double, double>> points = generate_pairs(n, range, 1);
+    vector<pair<double, double>> points = generate_pairs(n, range, 0);
 
     // save the generated points into a file
     ofstream fout("./data.csv");
@@ -41,5 +41,6 @@ int main(int argc, char *argv[]) {
         fout << x.first << "," << x.second << endl; 
     fout.close();
 
+    printf("Generated %d points between [-%d, +%d]\n", n, range, range);
     return 0;
 }

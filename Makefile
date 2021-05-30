@@ -13,9 +13,11 @@ OPTFLAGS	= -O3 -finline-functions -DNDEBUG
 
 TARGETS		= knn
 
-.PHONY: all clean cleanall
+.PHONY: all clean
 .SUFFIXES: .cpp 
 
+knn: knn.cpp utils.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $? $(LDFLAGS)
 
 %: %.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $< $(LDFLAGS)
@@ -24,6 +26,4 @@ all		: $(TARGETS)
 
 clean		: 
 	rm -f $(TARGETS)
-
-cleanall	: clean
 	rm -f *.o *~
