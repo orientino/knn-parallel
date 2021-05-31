@@ -1,7 +1,8 @@
 # FF_ROOT     points to the FastFlow root directory (i.e.
 #             the one containing the ff directory).
 ifndef FF_ROOT 
-FF_ROOT		= ${HOME}/fastflow
+FF_ROOT		= ${HOME}/uni/spm/fastflow
+# FF_ROOT		= ${HOME}/fastflow
 endif
 
 CXX			= g++ -std=c++17 
@@ -9,17 +10,26 @@ INCLUDES	= -I $(FF_ROOT)
 CXXFLAGS  	= -g # -DBLOCKING_MODE -DFF_BOUNDED_BUFFER
 
 LDFLAGS 	= -pthread
-OPTFLAGS	= -O3 -finline-functions -DNDEBUG
+OPTFLAGS	= -O3 -finline-functions -w -DNDEBUG
 
-TARGETS		= knn
+TARGETS		= knn_seq knn_par knn_ff generate
 
 .PHONY: all clean
 .SUFFIXES: .cpp 
 
-knn: knn.cpp utils.cpp
-	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $? $(LDFLAGS)
+knn_seq: knn_seq.cpp utils.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
 
-%: %.cpp
+knn_par: knn_par.cpp utils.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
+
+knn_ff_masterslave: knn_ff_masterslave.cpp utils.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
+
+knn_ff_parfor: knn_ff_parfor.cpp utils.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
+
+generate: generate.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $< $(LDFLAGS)
 
 all		: $(TARGETS)
