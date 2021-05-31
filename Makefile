@@ -12,7 +12,7 @@ CXXFLAGS  	= -g # -DBLOCKING_MODE -DFF_BOUNDED_BUFFER
 LDFLAGS 	= -pthread
 OPTFLAGS	= -O3 -finline-functions -w -DNDEBUG
 
-TARGETS		= knn_seq knn_par knn_ff generate
+TARGETS		= knn_seq knn_par knn_ff_masterslave knn_ff_parfor generate
 
 .PHONY: all clean
 .SUFFIXES: .cpp 
