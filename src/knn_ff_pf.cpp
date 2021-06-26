@@ -5,12 +5,10 @@
 #include <algorithm>
 #include <ff/ff.hpp>
 #include <ff/parallel_for.hpp>
-
 #include "utils.h"
 
 using namespace ff;
 using namespace std;
-using ull = unsigned long long;
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
@@ -26,7 +24,7 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    vector<pair<double, double>> points = read_points("./input.data");
+    vector<pair<double, double>> points = read_points("../data/input.data");
     vector<pair<int, vector<int>>> points_knn;
     vector<vector<pair<int, vector<int>>>> points_knn_local(nw);
 
@@ -48,6 +46,9 @@ int main(int argc, char *argv[]) {
             points_knn.insert(points_knn.end(), points_knn_local[i].begin(), points_knn_local[i].end());
     ffTime(STOP_TIME);
     cout << "Fastflow-ParallelFor time (msec): " << ffTime(GET_TIME) << endl;
+
+    // print_knn(points_knn);
+    // save_knn(points_knn, "../data/output.data");
 
     return 0;
 }

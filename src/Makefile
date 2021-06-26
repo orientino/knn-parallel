@@ -12,7 +12,7 @@ CXXFLAGS  	= -g # -DBLOCKING_MODE -DFF_BOUNDED_BUFFER
 LDFLAGS 	= -pthread
 OPTFLAGS	= -O3 -finline-functions -w -DNDEBUG
 
-TARGETS		= knn_seq knn_par knn_ff_masterslave knn_ff_parfor generate
+TARGETS		= knn_seq knn_par knn_ff_mw knn_ff_pf generate
 
 .PHONY: all clean
 .SUFFIXES: .cpp 
@@ -23,10 +23,10 @@ knn_seq: knn_seq.cpp utils.cpp
 knn_par: knn_par.cpp utils.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
 
-knn_ff_masterslave: knn_ff_masterslave.cpp utils.cpp
+knn_ff_mw: knn_ff_mw.cpp utils.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
 
-knn_ff_parfor: knn_ff_parfor.cpp utils.cpp
+knn_ff_pf: knn_ff_pf.cpp utils.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $(OPTFLAGS) -o $@ $^ $(LDFLAGS)
 
 generate: generate.cpp

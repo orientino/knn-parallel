@@ -4,10 +4,8 @@
 #include <sstream>
 #include <algorithm>
 #include <math.h>
-
 #include "utils.h"
 
-// Given a 2D point, compute its k-nearest neighbors
 vector<pair<int, vector<int>>> compute_knn(vector<int> points_idx, vector<pair<double, double>> points, int k) {
     vector<pair<int, vector<int>>> points_nn;
     int n = points.size() - 1;
@@ -34,7 +32,6 @@ vector<pair<int, vector<int>>> compute_knn(vector<int> points_idx, vector<pair<d
     return points_nn;
 }
 
-// Read file containing 2D points
 vector<pair<double, double>> read_points(string path) {
     vector<pair<double, double>> points;
 
@@ -53,7 +50,6 @@ vector<pair<double, double>> read_points(string path) {
     return points;
 }
 
-// Read the results of K-NN from a file
 vector<pair<int, vector<int>>> read_knn(string path) {
     vector<pair<int, vector<int>>> points_nn; 
 
@@ -77,7 +73,6 @@ vector<pair<int, vector<int>>> read_knn(string path) {
     return points_nn;
 }
 
-// Save the results of K-NN into a file
 void save_knn(vector<pair<int, vector<int>>> points_nn, string path) {
     ofstream fout(path);
     for (auto nn: points_nn) {
@@ -92,7 +87,6 @@ void save_knn(vector<pair<int, vector<int>>> points_nn, string path) {
     fout.close();
 }
 
-// Prints all the points with their correspective nearest neighbors
 void print_knn(vector<pair<int, vector<int>>> points_nn) {
     for (auto nn: points_nn) {
         cout << nn.first << ": "; 
@@ -102,7 +96,6 @@ void print_knn(vector<pair<int, vector<int>>> points_nn) {
     }
 }
 
-// Compute Euclidean distance between two 2D points
 double compute_distance(pair<double, double> point1, pair<double, double> point2) {
     double x = point1.first - point2.first;
     double y = point1.second - point2.second;

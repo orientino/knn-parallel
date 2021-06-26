@@ -6,7 +6,6 @@
 #include <thread>
 #include <algorithm>
 #include <mutex>
-
 #include "utils.h"
 
 using namespace std;
@@ -47,7 +46,7 @@ int main(int argc, char *argv[]) {
     const int nw = atoi(argv[1]);
     const int k = atoi(argv[2]);
 
-    vector<pair<double, double>> points = read_points("./input.data");
+    vector<pair<double, double>> points = read_points("../data/input.data");
 
     // parallel computation
     auto start = chrono::high_resolution_clock::now();
@@ -65,6 +64,9 @@ int main(int argc, char *argv[]) {
     auto elapsed = chrono::high_resolution_clock::now() - start;
     auto msec = chrono::duration_cast<chrono::milliseconds>(elapsed).count();
     cout << "Parallel time (msec): " << msec << endl;
+
+    // print_knn(points_knn);
+    // save_knn(points_knn, "../data/output.data");
 
     return 0;
 }

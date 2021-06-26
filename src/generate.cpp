@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
     vector<pair<double, double>> points = generate_pairs(n, range, 0);
 
     // save the generated points into a file
-    ofstream fout("./input.data");
+    ofstream fout("../data/input.data");
     for (auto const& x : points)
         fout << x.first << "," << x.second << endl; 
     fout.close();

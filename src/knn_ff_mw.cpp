@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <ff/ff.hpp>
 #include <ff/farm.hpp>
-
+#include <chrono>
 #include "utils.h"
 
 using namespace ff;
@@ -37,29 +37,29 @@ struct Emitter: ff_monode_t<Task_t> {
         // start of the emitter
         if (in == nullptr) {
             // distribute the workload to the slaves
-            const int nw = get_num_feedbackchannels();
+            const int nw = get_num_outchannels();
             const auto size = points.size() / (nw+1);
-            auto more = points.size() % (nw+1);
-            ull start = size;
-            ull stop = start;
+            ull start = 0;
+            ull stop = size;
 
             for (auto i=0; i<nw; ++i) {
-                start = stop;
-                stop = start + size + (more > 0 ? 1 : 0);
-                more--;
-
                 vector<int> points_idx;
                 for (auto i=start; i<stop; ++i) 
                     points_idx.push_back(i);
 
                 Task_t *task = new Task_t(points_idx, points, k);
                 ff_send_out(task, i);
+
+                if (i < nw-1) {
+                    start = stop;
+                    stop = start + size;
+                }
             }
             broadcast_task(EOS);
 
-            // compute the first partition locally and add to the final result
-            start = 0;
-            stop = size;
+            // compute the last partition locally and add to the final result
+            start = stop;
+            stop = points.size();
 
             vector<int> points_idx;
             for (auto i=start; i<stop; ++i) 
@@ -71,7 +71,7 @@ struct Emitter: ff_monode_t<Task_t> {
 
             return GO_ON;
         }
-
+ 
         // processing the feedback channels from the slaves
         // add the slaves' output to the final result
         auto &slave_result = in->result;
@@ -80,6 +80,10 @@ struct Emitter: ff_monode_t<Task_t> {
         delete in;
 
         return GO_ON;
+    }
+
+    void svc_end() {
+        sort(points_knn.begin(), points_knn.end());
     }
 };
 
@@ -104,10 +108,9 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
-    vector<pair<double, double>> points = read_points("./input.data");
+    vector<pair<double, double>> points = read_points("../data/input.data");
 
     // parallel computation using a master-slave skeleton
-    ffTime(START_TIME);
     ff_Farm<> farm([&]() {
         vector<unique_ptr<ff_node>> W;
         for (auto i=0; i<(nw-1); ++i)
@@ -125,12 +128,10 @@ int main(int argc, char *argv[]) {
         error("running farm\n");
         return -1;
     }
-    ffTime(STOP_TIME);
     cout << "Fastflow time (msec): " << farm.ffTime() << endl;
 
-    // vector<pair<int, vector<int>>> result = read_knn("./output.data");
-    // print_knn(result);
-    // cout << result.size() << endl;
+    // print_knn(E.points_knn);
+    // save_knn(E.points_knn, "../data/output.data");
 
     return 0;
 }
