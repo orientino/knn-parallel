@@ -7,7 +7,7 @@
 using namespace std;
 
 // Given a 2D point, compute its k-nearest neighbors
-vector<pair<int, vector<int>>> compute_knn(vector<int> points_idx, vector<pair<double, double>> points, int k); 
+vector<pair<int, vector<int>>> compute_knn(vector<pair<double, double>> points, pair<int, int> range, int k); 
 
 // Read file containing 2D points
 vector<pair<double, double>> read_points(string path); 

@@ -23,21 +23,15 @@ vector<pair<double, double>> generate_pairs(int n, int range, int verbose=0) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc < 4) {
-        cerr << "use: " << argv[0] << " seed n range\n";
+    if (argc < 3) {
+        cerr << "use: " << argv[0] << " n range\n";
         return -1;
     }
 
-    int seed = atoi(argv[1]);
-    int n = atoi(argv[2]);
-    int range = atoi(argv[3]);
+    int n = atoi(argv[1]);
+    int range = atoi(argv[2]);
 
-    if (argc != 4) {
-        cout << "use parameters [seed, n, range]." << endl;
-        return -1;
-    } 
-
-    srand(seed);
+    srand(0);
     vector<pair<double, double>> points = generate_pairs(n, range, 0);
 
     // save the generated points into a file

@@ -4,33 +4,70 @@
 #include <sstream>
 #include <algorithm>
 #include <math.h>
+#include <queue>
 #include "utils.h"
 
-vector<pair<int, vector<int>>> compute_knn(vector<int> points_idx, vector<pair<double, double>> points, int k) {
+
+vector<pair<int, vector<int>>> compute_knn(vector<pair<double, double>> points, pair<int, int> range, int k) {
     vector<pair<int, vector<int>>> points_nn;
     int n = points.size() - 1;
 
-    for (auto idx: points_idx) {
-        // compute and sort by the distance
-        vector<pair<double, int>> neighbors;
-        for (auto i=0; i<points.size(); i++) {
-            if (idx != i) {
-                double dist = compute_distance(points[idx], points[i]);
-                neighbors.push_back(make_pair(dist, i));
+    for (int i=range.first; i<range.second; i++) {
+        // compute and use the max-heap data structure
+        priority_queue<pair<double, int>> neighbors;
+        for (auto j=0; j<points.size(); j++) {
+            if (i != j) {
+                double dist = compute_distance(points[i], points[j]);
+                if (neighbors.size() < k)
+                    neighbors.push(make_pair(dist, j));
+                else if (neighbors.top().first > dist) {
+                    neighbors.pop();
+                    neighbors.push(make_pair(dist, j));
+                }
             }
         }
-        sort(neighbors.begin(), neighbors.end());
 
         // save the k-nearest neighbors
+        // the order of the neighbors is descendent
         vector<int> knn;
-        for (auto i=0; i<k; i++) 
-            knn.push_back(neighbors[i].second);
+        for (auto j=0; j<k; j++) {
+            knn.push_back(neighbors.top().second);
+            neighbors.pop();
+        } 
 
         // add element
-        points_nn.push_back(make_pair(idx, knn));
+        points_nn.push_back(make_pair(i, knn));
     } 
     return points_nn;
 }
+
+
+// vector<pair<int, vector<int>>> compute_knn(vector<pair<double, double>> points, pair<int, int> range, int k) {
+//     vector<pair<int, vector<int>>> points_nn;
+//     int n = points.size() - 1;
+
+//     for (int i=range.first; i<range.second; i++) {
+//         // compute and sort by the distance
+//         vector<pair<double, int>> neighbors;
+//         for (auto j=0; j<points.size(); j++) {
+//             if (i != j) {
+//                 double dist = compute_distance(points[i], points[j]);
+//                 neighbors.push_back(make_pair(dist, j));
+//             }
+//         }
+//         sort(neighbors.begin(), neighbors.end());
+
+//         // save the k-nearest neighbors
+//         vector<int> knn;
+//         for (auto j=0; j<k; j++) 
+//             knn.push_back(neighbors[j].second);
+
+//         // add element
+//         points_nn.push_back(make_pair(i, knn));
+//     } 
+//     return points_nn;
+// }
+
 
 vector<pair<double, double>> read_points(string path) {
     vector<pair<double, double>> points;
@@ -49,6 +86,7 @@ vector<pair<double, double>> read_points(string path) {
 
     return points;
 }
+
 
 vector<pair<int, vector<int>>> read_knn(string path) {
     vector<pair<int, vector<int>>> points_nn; 
@@ -73,6 +111,7 @@ vector<pair<int, vector<int>>> read_knn(string path) {
     return points_nn;
 }
 
+
 void save_knn(vector<pair<int, vector<int>>> points_nn, string path) {
     ofstream fout(path);
     for (auto nn: points_nn) {
@@ -87,6 +126,7 @@ void save_knn(vector<pair<int, vector<int>>> points_nn, string path) {
     fout.close();
 }
 
+
 void print_knn(vector<pair<int, vector<int>>> points_nn) {
     for (auto nn: points_nn) {
         cout << nn.first << ": "; 
@@ -96,11 +136,9 @@ void print_knn(vector<pair<int, vector<int>>> points_nn) {
     }
 }
 
+
 double compute_distance(pair<double, double> point1, pair<double, double> point2) {
     double x = point1.first - point2.first;
     double y = point1.second - point2.second;
-    double dist;
-
-    dist = sqrt(pow(x, 2) + pow(y, 2));
-    return dist;
+    return sqrt(pow(x, 2) + pow(y, 2));
 }

@@ -2,13 +2,14 @@
 #include <iostream>
 #include <utility>
 #include <vector>
-#include <chrono>
 #include <thread>
 #include <algorithm>
 #include <mutex>
 #include "utils.h"
+#include "utimer.cpp"
 
 using namespace std;
+
 
 void thread_body(
                     int threadno, 
@@ -24,12 +25,8 @@ void thread_body(
     auto start = threadno * delta;
     auto stop  = threadno == (nw-1) ? n : (threadno+1) * delta;
 
-    vector<int> idx;
-    for (auto i=start; i<stop; ++i)
-        idx.push_back(i);
-
     // compute the local knn
-    vector<pair<int, vector<int>>> points_knn_local = compute_knn(idx, points, k); 
+    vector<pair<int, vector<int>>> points_knn_local = compute_knn(points, make_pair(start, stop), k); 
 
     // add the local result to the global result
     globallock.lock();
@@ -37,33 +34,29 @@ void thread_body(
     globallock.unlock();
 }
 
+
 int main(int argc, char *argv[]) {
     if (argc < 3) {
-        cerr << "use: " << argv[0] << " nw k \n";
+        cerr << argv[0] << " [k] [nw] \n";
         return -1;
     }
-
-    const int nw = atoi(argv[1]);
-    const int k = atoi(argv[2]);
+    const int k = atoi(argv[1]);
+    const int nw = atoi(argv[2]);
 
     vector<pair<double, double>> points = read_points("../data/input.data");
-
-    // parallel computation
-    auto start = chrono::high_resolution_clock::now();
-
     vector<pair<int, vector<int>>> points_knn;
     vector<thread*> tids(nw);
     mutex globallock;
 
-    for (auto i=0; i<nw; ++i)
-        tids[i] = new thread(thread_body, i, points, ref(points_knn), nw, k, ref(globallock));
-    for(int i=0; i<nw; ++i)
-        tids[i]->join(); 
-    sort(points_knn.begin(), points_knn.end());
-
-    auto elapsed = chrono::high_resolution_clock::now() - start;
-    auto msec = chrono::duration_cast<chrono::milliseconds>(elapsed).count();
-    cout << "Parallel time (msec): " << msec << endl;
+    // measure parallel computation
+    {
+        utimer tcompute("Parallel");
+        for (auto i=0; i<nw; ++i)
+            tids[i] = new thread(thread_body, i, points, ref(points_knn), nw, k, ref(globallock));
+        for(int i=0; i<nw; ++i)
+            tids[i]->join(); 
+        sort(points_knn.begin(), points_knn.end());
+    }
 
     // print_knn(points_knn);
     // save_knn(points_knn, "../data/output.data");
