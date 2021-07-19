@@ -1,8 +1,8 @@
 # FF_ROOT     points to the FastFlow root directory (i.e.
 #             the one containing the ff directory).
 ifndef FF_ROOT 
-FF_ROOT		= ${HOME}/uni/spm/fastflow
-# FF_ROOT		= ${HOME}/fastflow
+# FF_ROOT		= ${HOME}/uni/spm/fastflow
+FF_ROOT		= ${HOME}/fastflow
 endif
 
 CXX			= g++ -std=c++17 

@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 
     // measure parallel computation
     {
-        utimer tcompute("FF-MS-Parallel");
+        utimer tcompute("FF-PF-Parallel");
         parallel_for_idx(0, points.size(), 1, 0, 
             [&](const long start, const long stop, const long thid) {
                 points_knn_local[thid] = compute_knn(points, make_pair(start, stop), k);

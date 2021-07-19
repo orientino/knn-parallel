@@ -29,32 +29,42 @@ struct Emitter: ff_monode_t<Task_t> {
     vector<pair<double, double>> points;
     vector<pair<int, vector<int>>> points_knn;
     int k;
+    int nw;
 
-    Emitter(vector<pair<double, double>> points, int k): 
+    Emitter(vector<pair<double, double>> points, int k, int nw): 
         points(points), 
-        k(k) {}
+        k(k),
+        nw(nw) {}
 
     Task_t *svc(Task_t *in) {
         // start of the emitter
         if (in == nullptr) {
-            // distribute the workload to the slaves
-            const int nw = get_num_outchannels();
-            const auto size = points.size() / (nw+1);
+            // distribute the workload to the workers
+            const auto size = points.size() / nw;
             int start = 0;
             int stop = size;
 
-            for (auto i=0; i<nw; ++i) {
+            // parallelism = 1
+            if (nw == 1) {
+                Task_t *task = new Task_t(points, make_pair(start, stop), k);
+                ff_send_out(task, 0);
+                broadcast_task(EOS);
+                return GO_ON;
+            }
+
+            // parallelism > 1
+            for (auto i=0; i<nw-1; ++i) {
                 Task_t *task = new Task_t(points, make_pair(start, stop), k);
                 ff_send_out(task, i);
 
-                if (i < nw-1) {
+                if (i < nw-2) {
                     start = stop;
                     stop = start + size;
                 }
             }
             broadcast_task(EOS);
 
-            // compute the last partition locally and add to the final result
+            // compute the last partition locally and add it to the final result
             start = stop;
             stop = points.size();
 
@@ -65,10 +75,10 @@ struct Emitter: ff_monode_t<Task_t> {
             return GO_ON;
         }
  
-        // add the slaves' output to the final result
-        auto &slave_result = in->result;
-        if (slave_result.size())
-            points_knn.insert(points_knn.end(), slave_result.begin(), slave_result.end());
+        // add the workers' output to the final result
+        auto &worker_result = in->result;
+        if (worker_result.size())
+            points_knn.insert(points_knn.end(), worker_result.begin(), worker_result.end());
         delete in;
 
         return GO_ON;
@@ -99,14 +109,17 @@ int main(int argc, char *argv[]) {
 
     vector<pair<double, double>> points = read_points("../data/input.data");
 
-    // master-slave skeleton
+    // master-worker skeleton with custom emitter
     ff_Farm<> farm([&]() {
         vector<unique_ptr<ff_node>> W;
-        for (auto i=0; i<(nw-1); ++i)
+        if (nw == 1) 
             W.push_back(make_unique<Worker>());
+        else
+            for (auto i=0; i<(nw-1); ++i)
+                W.push_back(make_unique<Worker>());
         return W;
     }());
-    Emitter E(points, k);
+    Emitter E(points, k, nw);
     farm.add_emitter(E);
     farm.remove_collector();
     farm.wrap_around();
@@ -121,7 +134,7 @@ int main(int argc, char *argv[]) {
     }
 
     // print_knn(E.points_knn);
-    // save_knn(E.points_knn, "../data/output.data");
+    save_knn(E.points_knn, "../data/output.data");
 
     return 0;
 }
